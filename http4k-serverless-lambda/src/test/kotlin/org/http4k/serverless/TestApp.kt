@@ -10,7 +10,7 @@ import org.http4k.serverless.lambda.LAMBDA_CONTEXT_KEY
 import org.http4k.serverless.lambda.LAMBDA_REQUEST_KEY
 
 object TestApp : AppLoader {
-    override fun invoke(env: Map<String, String>): HttpHandler = { request ->
+    override fun invoke(env: Map<String, String>) = HttpHandler { request ->
         env.toList().fold(Response(CREATED)) { memo, (key, value) ->
             memo.header(key, value)
         }.body(request.removeHeader("x-http4k-context").toString())
