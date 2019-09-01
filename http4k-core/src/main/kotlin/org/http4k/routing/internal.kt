@@ -119,7 +119,7 @@ internal data class SinglePageAppRoutingHandler(
     override fun invoke(p1: Request): Response {
         val matchOnStatic = staticHandler.match(p1)?.let { it(p1) }
         val matchOnIndex = staticHandler.match(Request(GET, pathSegments))
-        val fallbackHandler = matchOnIndex ?: { Response(NOT_FOUND) }
+        val fallbackHandler = matchOnIndex ?: HttpHandler { Response(NOT_FOUND) }
         return matchOnStatic ?: fallbackHandler(Request(GET, pathSegments))
     }
 
