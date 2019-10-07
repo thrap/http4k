@@ -18,7 +18,7 @@ object TestApp : AppLoader {
 }
 
 object TestAppWithContexts : AppLoaderWithContexts {
-    override fun invoke(env: Map<String, String>, contexts: RequestContexts): HttpHandler = { request ->
+    override fun invoke(env: Map<String, String>, contexts: RequestContexts) = HttpHandler { request ->
         val lambdaContext: Context? = contexts[request][LAMBDA_CONTEXT_KEY]
         val lambdaRequest: APIGatewayProxyRequestEvent? = contexts[request][LAMBDA_REQUEST_KEY]
 
