@@ -18,13 +18,12 @@ import org.junit.jupiter.api.Test
 import tutorials.add_a_little_chaos_to_your_life._2.Library
 import tutorials.add_a_little_chaos_to_your_life._2.Server
 
-fun FakeLibrary(succeed: Boolean): HttpHandler =
-    {
-        when (succeed) {
-            true -> Response(OK).body("Fahrenheit 451, Brave New World, 1984")
-            else -> Response(INTERNAL_SERVER_ERROR)
-        }
+fun FakeLibrary(succeed: Boolean) = HttpHandler {
+    when (succeed) {
+        true -> Response(OK).body("Fahrenheit 451, Brave New World, 1984")
+        else -> Response(INTERNAL_SERVER_ERROR)
     }
+}
 
 class LibraryTest {
     @Test
