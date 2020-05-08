@@ -13,6 +13,9 @@ interface Discovery<ServiceId> {
     fun lookup(id: ServiceId): HttpHandler
 }
 
+/**
+ * Run a cluster of HttpHandlers in a way that they can be wired together
+ */
 class H4KCluster<ServiceId>(private val log: (String) -> Unit = ::println) : Discovery<ServiceId> {
     private val services = mutableMapOf<ServiceId, HttpHandler>()
     private val servers = mutableListOf<Pair<ServiceId, Http4kServer>>()
