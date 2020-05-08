@@ -29,14 +29,14 @@ class H4KCluster<ServiceId> : Discovery<ServiceId> {
     fun start() = apply {
         servers.forEach {
             it.second.start()
-            println("Started ${it.first} on ${it.second.port()}")
+            println("Bound ${it.first} to ${it.second.port()}")
         }
     }
 
     fun stop() = apply {
         servers.forEach {
             it.second.stop()
-            println("Stopped ${it.first}")
+            println("Unbound ${it.first}")
         }
     }
 }
