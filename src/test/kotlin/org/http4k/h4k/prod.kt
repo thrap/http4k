@@ -29,8 +29,7 @@ object App {
     }
 
     fun Server(environment: Environment, registry: Registry<InternalServiceId>, egress: Discovery<ExternalServiceId>) =
-        App(egress.lookup(ExternalServiceId("reverser")))
-            .asServer(RegisteringServerConfig(ID, registry, SunHttp(port(environment))))
+        App(egress.lookup(Reverser.ID)).asServer(RegisteringServerConfig(ID, registry) { SunHttp(port(environment)) })
 }
 
 object Proxy {
@@ -40,7 +39,7 @@ object Proxy {
     operator fun invoke(appHttp: HttpHandler) = { req: Request -> appHttp(req) }
 
     fun Server(environment: Environment, registry: Registry<InternalServiceId>) =
-        Proxy(registry.lookup(App.ID)).asServer(RegisteringServerConfig(ID, registry, SunHttp(port(environment))))
+        Proxy(registry.lookup(App.ID)).asServer(RegisteringServerConfig(ID, registry) { SunHttp(port(environment)) })
 }
 
 object Reverser {

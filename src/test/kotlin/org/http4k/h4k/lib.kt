@@ -17,16 +17,47 @@ interface Discovery<ServiceId> {
     fun lookup(id: ServiceId): HttpHandler
 }
 
+typealias ServerControl = (() -> Http4kServer) -> Unit
+
 interface Registry<ServiceId> : Discovery<ServiceId> {
-    fun register(id: ServiceId, http: HttpHandler): Registry<ServiceId> = apply {}
-    fun unregister(id: ServiceId): Registry<ServiceId> = apply {}
+    fun register(id: ServiceId, http: HttpHandler): ServerControl
+    fun unregister(id: ServiceId)
 }
 
 /**
  * Use this when running in deployed K8S cluster to register and lookup K8S services
  */
 class K8SServiceRegistry<ServiceId>(private val port: (ServiceId) -> Port = { Port(8080) }) : Registry<ServiceId> {
+
+    private val services = mutableMapOf<ServiceId, Http4kServer>()
+
+    override fun register(id: ServiceId, http: HttpHandler): ServerControl = {
+        services[id] = it().start()
+    }
+
+    override fun unregister(id: ServiceId) {
+        services[id]?.stop()
+    }
+
     override fun lookup(id: ServiceId) = ClientFilters.SetHostFrom(Uri.of("http://${id}:${port(id).value}")).then(OkHttp())
+}
+
+/**
+ * Use this in locally running cluster mode (all port bound services)
+ */
+class LocalRegistry<ServiceId> : Registry<ServiceId> {
+
+    private val services = mutableMapOf<ServiceId, Http4kServer>()
+
+    override fun register(id: ServiceId, http: HttpHandler): ServerControl = {
+        services[id] = it().start()
+    }
+
+    override fun unregister(id: ServiceId) {
+        services[id]?.stop()
+    }
+
+    override fun lookup(id: ServiceId) = ClientFilters.SetHostFrom(Uri.of("http://localhost:${services[id]}")).then(OkHttp())
 }
 
 /**
@@ -40,46 +71,36 @@ class EnvironmentConfiguredDiscovery<ExternalServiceId>(private val environment:
 }
 
 /**
- * Use this in locally running cluster mode (all port bound services)
- */
-class LocalRegistry<ServiceId>(private val ports: Map<ServiceId, Port>) : Registry<ServiceId> {
-    override fun lookup(id: ServiceId) = ClientFilters.SetHostFrom(Uri.of("http://localhost:${ports[id]?.value}")).then(OkHttp())
-}
-
-/**
  * Use this for an entirely in-memory cluster
  */
 class H4KRegistry<ServiceId> : Registry<ServiceId> {
     private val services = mutableMapOf<ServiceId, HttpHandler>()
 
-    override fun register(id: ServiceId, http: HttpHandler) = apply { services[id] = http }
+    override fun register(id: ServiceId, http: HttpHandler): ServerControl = {
+        services[id] = http
+    }
 
-    override fun unregister(id: ServiceId) = apply { services -= id }
+    override fun unregister(id: ServiceId) {
+        services -= id
+    }
 
     override fun lookup(id: ServiceId) = services[id] ?: throw IllegalArgumentException("$id is not registered")
 }
 
-/**
- *
- */
 class RegisteringServerConfig<ServiceId>(
     private val name: ServiceId,
     private val registry: Registry<ServiceId>,
-    private val serverConfig: ServerConfig) : ServerConfig {
+    private val serverConfig: () -> ServerConfig) : ServerConfig {
 
     override fun toServer(httpHandler: HttpHandler) = object : Http4kServer {
-        private val server = serverConfig.toServer(httpHandler)
-
-        override fun start(): Http4kServer = apply {
-            server.start()
-            registry.register(name, httpHandler)
+        override fun start() = apply {
+            registry.register(name, httpHandler).invoke { serverConfig().toServer(httpHandler) }
         }
 
-        override fun stop(): Http4kServer = apply {
+        override fun stop() = apply {
             registry.unregister(name)
-            server.stop()
         }
 
-        override fun port() = server.port()
+        override fun port() = serverConfig().toServer(httpHandler).port()
     }
 }
