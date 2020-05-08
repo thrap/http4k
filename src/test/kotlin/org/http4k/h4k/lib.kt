@@ -25,8 +25,8 @@ interface Registry<ServiceId> : Discovery<ServiceId> {
 /**
  * Use this when running in deployed K8S cluster to register and lookup K8S services
  */
-class K8SServiceRegistry<ServiceId> : Registry<ServiceId> {
-    override fun lookup(id: ServiceId) = ClientFilters.SetHostFrom(Uri.of("http://${id}:8080")).then(OkHttp())
+class K8SServiceRegistry<ServiceId>(private val port: (ServiceId) -> Port = { Port(8080) }) : Registry<ServiceId> {
+    override fun lookup(id: ServiceId) = ClientFilters.SetHostFrom(Uri.of("http://${id}:${port(id).value}")).then(OkHttp())
 }
 
 /**
