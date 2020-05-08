@@ -46,7 +46,7 @@ class K8SServiceRegistry<ServiceId>(private val port: (ServiceId) -> Port = { Po
 /**
  * Use this in locally running cluster mode (all port bound services)
  */
-class LocalRegistry<ServiceId> : Registry<ServiceId> {
+class LocalPortBoundCluster<ServiceId> : Registry<ServiceId> {
 
     private val services = mutableMapOf<ServiceId, Http4kServer>()
 
@@ -74,7 +74,7 @@ class EnvironmentConfiguredDiscovery<ExternalServiceId>(private val environment:
 /**
  * Use this for an entirely in-memory cluster
  */
-class H4KRegistry<ServiceId> : Registry<ServiceId> {
+class InMemoryH4KCluster<ServiceId> : Registry<ServiceId> {
     private val services = mutableMapOf<ServiceId, HttpHandler>()
 
     override fun register(id: ServiceId, http: HttpHandler): ServerControl = {
