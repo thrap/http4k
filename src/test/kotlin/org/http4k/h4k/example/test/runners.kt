@@ -9,9 +9,9 @@ import org.http4k.core.Response
 import org.http4k.core.Status.Companion.OK
 import org.http4k.h4k.Discovery
 import org.http4k.h4k.EnvironmentConfiguredDiscovery
-import org.http4k.h4k.InMemoryH4KCluster
+import org.http4k.h4k.InMemoryH4KRegistry
 import org.http4k.h4k.K8SServiceRegistry
-import org.http4k.h4k.LocalPortBoundCluster
+import org.http4k.h4k.LocalPortBoundRegistry
 import org.http4k.h4k.RegisteringServerConfig
 import org.http4k.h4k.Registry
 import org.http4k.h4k.example.main.App
@@ -33,19 +33,19 @@ object RunK8SCluster {
 object RunLocalCluster {
     @JvmStatic
     fun main(args: Array<String>) {
-        val egress = LocalPortBoundCluster<ExternalServiceId>()
+        val egress = LocalPortBoundRegistry<ExternalServiceId>()
         Reverser.Server(egress).start()
-        runClusterWith(ENV, LocalPortBoundCluster(), egress)
+        runClusterWith(ENV, LocalPortBoundRegistry(), egress)
     }
 }
 
 object RunH4KCluster {
     @JvmStatic
     fun main(args: Array<String>) {
-        val egress = LocalPortBoundCluster<ExternalServiceId>()
+        val egress = LocalPortBoundRegistry<ExternalServiceId>()
         Reverser.Server(egress).start()
 
-        runClusterWith(ENV, InMemoryH4KCluster(), egress)
+        runClusterWith(ENV, InMemoryH4KRegistry(), egress)
     }
 }
 
