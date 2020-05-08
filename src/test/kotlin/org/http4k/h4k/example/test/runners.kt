@@ -47,17 +47,18 @@ object RunLocalCluster {
 object RunH4KCluster {
     @JvmStatic
     fun main(args: Array<String>) {
-
         val egress = H4KCluster<ExternalServiceId>()
-            .installSvc(Reverser.ID) { Reverser.App() }
-            .exposeSvc(Reverser.ID, Port(10000))
+            .install(Reverser.ID) { Reverser.App() }
+            .expose(Reverser.ID, Port(10000))
             .start()
 
-        H4KCluster<InternalServiceId>()
-            .installSvc(App.ID) { App(egress.lookup(Reverser.ID)) }
-            .installSvc(Proxy.ID) { Proxy(it.lookup(App.ID)) }
-            .exposeSvc(Proxy.ID, Port(8000))
+        val cluster = H4KCluster<InternalServiceId>()
+            .install(App.ID) { App(egress.lookup(Reverser.ID)) }
+            .install(Proxy.ID) { discovery -> Proxy(discovery.lookup(App.ID)) }
+            .expose(Proxy.ID, Port(8000))
             .start()
+
+        println(cluster.lookup(Proxy.ID)(Request(GET, "")))
 
         val client = ClientFilters.SetBaseUriFrom(Uri.of("http://localhost:8000")).then(OkHttp())
         println(client(Request(GET, "")))
