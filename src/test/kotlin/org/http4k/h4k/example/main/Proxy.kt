@@ -4,8 +4,8 @@ import org.http4k.cloudnative.env.Environment
 import org.http4k.cloudnative.env.EnvironmentKey
 import org.http4k.core.HttpHandler
 import org.http4k.core.Request
-import org.http4k.h4k.RegisteringServerConfig
-import org.http4k.h4k.Registry
+import org.http4k.h4k.example.lib.RegisteringServerConfig
+import org.http4k.h4k.example.lib.Registry
 import org.http4k.lens.int
 import org.http4k.server.SunHttp
 import org.http4k.server.asServer

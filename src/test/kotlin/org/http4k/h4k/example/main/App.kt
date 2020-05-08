@@ -6,9 +6,9 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
-import org.http4k.h4k.Discovery
-import org.http4k.h4k.RegisteringServerConfig
-import org.http4k.h4k.Registry
+import org.http4k.h4k.example.lib.Discovery
+import org.http4k.h4k.example.lib.RegisteringServerConfig
+import org.http4k.h4k.example.lib.Registry
 import org.http4k.lens.int
 import org.http4k.server.SunHttp
 import org.http4k.server.asServer

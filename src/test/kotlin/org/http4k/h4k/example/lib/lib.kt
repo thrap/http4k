@@ -1,4 +1,4 @@
-package org.http4k.h4k
+package org.http4k.h4k.example.lib
 
 
 import org.http4k.client.OkHttp
@@ -12,17 +12,6 @@ import org.http4k.filter.ClientFilters
 import org.http4k.lens.uri
 import org.http4k.server.Http4kServer
 import org.http4k.server.ServerConfig
-
-interface Discovery<ServiceId> {
-    fun lookup(id: ServiceId): HttpHandler
-}
-
-typealias ServerControl = (() -> Http4kServer) -> Unit
-
-interface Registry<ServiceId> : Discovery<ServiceId> {
-    fun register(id: ServiceId, http: HttpHandler): ServerControl
-    fun unregister(id: ServiceId)
-}
 
 /**
  * Use this when running an app in a deployed K8S cluster to register and lookup other K8S services
@@ -69,23 +58,6 @@ class EnvironmentConfiguredDiscovery<ExternalServiceId>(private val environment:
         val lens = EnvironmentKey.uri().required(id.toString().toUpperCase() + "_URL")
         return ClientFilters.SetHostFrom(lens(environment)).then(OkHttp())
     }
-}
-
-/**
- * Use this for an entirely in-memory cluster
- */
-class InMemoryH4KRegistry<ServiceId> : Registry<ServiceId> {
-    private val services = mutableMapOf<ServiceId, HttpHandler>()
-
-    override fun register(id: ServiceId, http: HttpHandler): ServerControl = {
-        services[id] = http
-    }
-
-    override fun unregister(id: ServiceId) {
-        services -= id
-    }
-
-    override fun lookup(id: ServiceId) = services[id] ?: throw IllegalArgumentException("$id is not registered")
 }
 
 class RegisteringServerConfig<ServiceId>(
