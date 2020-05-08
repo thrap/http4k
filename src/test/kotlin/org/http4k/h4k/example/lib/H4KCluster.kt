@@ -24,10 +24,13 @@ class H4KCluster<ServiceId> : Discovery<ServiceId> {
     override fun lookup(id: ServiceId) = services[id]
         ?: throw IllegalStateException("$id is not registered in this cluster")
 
-    fun running(id: ServiceId, port: Port? = null, appFn: (Discovery<ServiceId>) -> HttpHandler) = apply {
+    fun installSvc(id: ServiceId, appFn: (Discovery<ServiceId>) -> HttpHandler) = apply {
         val app = appFn(this)
         services[id] = app
-        port?.also { servers += (id to app.asServer(SunHttp(it.value))) }
+    }
+
+    fun exposeSvc(id: ServiceId, port: Port) = apply {
+        servers += id to lookup(id).asServer(SunHttp(port.value))
     }
 
     fun start() = apply {

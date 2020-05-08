@@ -49,12 +49,14 @@ object RunH4KCluster {
     fun main(args: Array<String>) {
 
         val egress = H4KCluster<ExternalServiceId>()
-            .running(Reverser.ID, Port(10000)) { Reverser.App() }
+            .installSvc(Reverser.ID) { Reverser.App() }
+            .exposeSvc(Reverser.ID, Port(10000))
             .start()
 
         H4KCluster<InternalServiceId>()
-            .running(App.ID) { App(egress.lookup(Reverser.ID)) }
-            .running(Proxy.ID, Port(8000)) { Proxy(it.lookup(App.ID)) }
+            .installSvc(App.ID) { App(egress.lookup(Reverser.ID)) }
+            .installSvc(Proxy.ID) { Proxy(it.lookup(App.ID)) }
+            .exposeSvc(Proxy.ID, Port(8000))
             .start()
 
         val client = ClientFilters.SetBaseUriFrom(Uri.of("http://localhost:8000")).then(OkHttp())
