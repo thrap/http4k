@@ -5,6 +5,8 @@ data class Port(val value: Int) {
         require(value <= 65535) { "Out of range Port: '$value'" }
     }
 
+    override fun toString() = value.toString()
+
     companion object {
         val RANDOM = Port(0)
     }

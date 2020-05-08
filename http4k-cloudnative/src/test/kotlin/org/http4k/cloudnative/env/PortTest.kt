@@ -17,4 +17,9 @@ class PortTest {
         Port(65535)
         assertThat({ Port(65536) }, throws<IllegalArgumentException>())
     }
+
+    @Test
+    fun `toString is value of port`() {
+        assertThat(Port(12345).toString(), equalTo("12345"))
+    }
 }
