@@ -5,7 +5,7 @@ changes with their rationale when appropriate:
 
 ### v3.253.0 (uncut)
 - [http4k-client-websocket] [Unlikely break] Allow API users to pass in their own `Draft` object for custom protocols. If broken, simple fix is to just use named arguments in the construction call to the client.
-- [http4k-testing-webdriver] [Unlikely break] Change Webdriver implementation to support v4.0 Selenium API. We now have a custom set of `By` implementations instead of leaning on the Selenium ones which are now deprecated for removal.
+- [http4k-testing-webdriver] [Unlikely break] Change Webdriver implementation to support v4.0 Selenium API. We now have a custom set of `By` implementations instead of leaning on the Selenium ones which are now deprecated for removal. The only code change required to fix is to import the http4k By classes instead of the deprecated ones.
 
 ### v3.252.0
 - [http4k-server-apache, http4k-client-apache, http4k-client-apache-async] [Breaking] Updated to Apache HTTP 5.X.X. H/T to @jshiell. Note that the underlying Apache APIs have changed in the v5 release. For the clients, this should only break if you have customised the underlying HTTP `CloseableHttpClient` that is passed to the constructor of the http4k client. If you have, we have you covered with....
