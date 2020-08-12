@@ -3,6 +3,11 @@
 This list is not currently intended to be all-encompassing - it will document major and breaking API 
 changes with their rationale when appropriate:
 
+### v4.0.0.0
+- [CLI]
+- [all] [Breaking] Removed almost all previous deprecations from v3 codebase.
+- [all] [Breaking] Removed `GenerateDataClass` filters. Please use the toolbox CLI to do this.
+
 ### v3.256.1
 - [http4k-core] Fix #470. Path.of cannot decode path parameter values containing %/
 
