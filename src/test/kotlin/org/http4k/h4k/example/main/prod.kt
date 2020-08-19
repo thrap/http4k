@@ -5,6 +5,7 @@ import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
+import org.http4k.h4k.example.lib.Discovery
 
 data class InternalServiceId(val name: String)
 data class ExternalServiceId(val name: String)
@@ -15,7 +16,10 @@ data class ExternalServiceId(val name: String)
 object Proxy {
     val ID = InternalServiceId("proxy")
 
-    operator fun invoke(appHttp: HttpHandler) = { req: Request -> appHttp(req) }
+    operator fun invoke(discovery: Discovery<InternalServiceId>): (Request) -> Response {
+        val app = discovery.lookup(App.ID)
+        return { req: Request -> app(req) }
+    }
 }
 
 /**
@@ -24,8 +28,8 @@ object Proxy {
 object App {
     val ID = InternalServiceId("app")
 
-    operator fun invoke(reverserHttp: HttpHandler): HttpHandler {
-        val reverser = Reverser.Client(reverserHttp)
+    operator fun invoke(discovery: Discovery<ExternalServiceId>): HttpHandler {
+        val reverser = Reverser.Client(discovery.lookup(Reverser.ID))
         return { _: Request -> Response(Status.OK).body(reverser.reverse("hello world")) }
     }
 }

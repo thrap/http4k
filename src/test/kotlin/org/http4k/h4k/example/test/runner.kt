@@ -28,8 +28,8 @@ fun main() {
 
     // this is our service cluster
     val cluster = H4KCluster<InternalServiceId>()
-        .install(App.ID) { App(egress.lookup(Reverser.ID)) }
-        .install(Proxy.ID) { discovery -> Proxy(discovery.lookup(App.ID)) }
+        .install(App.ID) { App(egress) }
+        .install(Proxy.ID) { Proxy(it) }
         .expose(Proxy.ID, Port(8000))
         .start()
 
