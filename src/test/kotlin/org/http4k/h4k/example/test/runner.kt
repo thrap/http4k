@@ -3,7 +3,7 @@ package org.http4k.h4k.example.test
 import org.http4k.client.OkHttp
 import org.http4k.cloudnative.env.Port
 import org.http4k.core.HttpHandler
-import org.http4k.core.Method
+import org.http4k.core.Method.GET
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status.Companion.OK
@@ -38,11 +38,11 @@ fun main() {
         .start()
 
     // look up the service HttpHandler by ID
-    println(cluster.lookup(Proxy.ID)(Request(Method.GET, "")))
+    println(cluster.lookup(Proxy.ID)(Request(GET, "")))
 
     // because we've exposed it, we can also go over the wire
     val client = ClientFilters.SetBaseUriFrom(Uri.of("http://localhost:8000")).then(OkHttp())
-    println(client(Request(Method.GET, "")))
+    println(client(Request(GET, "")))
 
     cluster.stop()
     egress.stop()
