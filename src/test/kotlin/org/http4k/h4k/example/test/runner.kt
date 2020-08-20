@@ -6,23 +6,27 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
-import org.http4k.core.Status
+import org.http4k.core.Status.Companion.OK
 import org.http4k.core.Uri
 import org.http4k.core.then
 import org.http4k.filter.ClientFilters
 import org.http4k.h4k.example.lib.H4KCluster
 import org.http4k.h4k.example.main.App
+import org.http4k.h4k.example.main.Doubler
 import org.http4k.h4k.example.main.ExternalServiceId
 import org.http4k.h4k.example.main.InternalServiceId
 import org.http4k.h4k.example.main.Proxy
 import org.http4k.h4k.example.main.Reverser
 
-fun FakeReverserApp(): HttpHandler = { req: Request -> Response(Status.OK).body(req.bodyString().reversed()) }
+fun FakeReverserApp(): HttpHandler = { req: Request -> Response(OK).body(req.bodyString().reversed()) }
+fun FakeDoublerApp(): HttpHandler = { req: Request -> Response(OK).body(req.bodyString() + req.bodyString()) }
 
 fun main() {
     // this is our "fakes" cluster
     val egress = H4KCluster<ExternalServiceId>()
         .install(Reverser.ID) { FakeReverserApp() }
+        .expose(Doubler.ID, Port(20000))
+        .install(Doubler.ID) { FakeDoublerApp() }
         .expose(Reverser.ID, Port(10000))
         .start()
 
