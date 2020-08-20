@@ -16,6 +16,6 @@ object Proxy {
         return { req: Request -> app(req) }
     }
 
-    fun main() = ProdAppServer() { Proxy(InternalDiscovery()) }.start()
+    fun main() = ProdAppServer { Proxy(ProdInternalDiscovery()) }.start()
 }
 

@@ -14,20 +14,21 @@ import org.http4k.h4k.example.main.external.Doubler
 import org.http4k.h4k.example.main.external.Reverser
 import org.http4k.h4k.example.main.internal.Main
 import org.http4k.h4k.example.main.internal.Proxy
-import org.http4k.h4k.example.test.external.Fake
+import org.http4k.h4k.example.test.external.FakeDoubler
+import org.http4k.h4k.example.test.external.FakeReverser
 
 fun main() {
     // this is our "fakes" cluster
-    val egress = H4KCluster<ExternalServiceId>()
-        .install(Reverser.ID) { Reverser.Fake() }
+    val externals = H4KCluster<ExternalServiceId>()
+        .install(Reverser.ID) { FakeReverser() }
         .expose(Doubler.ID, Port(20000))
-        .install(Doubler.ID) { Doubler.Fake() }
+        .install(Doubler.ID) { FakeDoubler() }
         .expose(Reverser.ID, Port(10000))
         .start()
 
     // this is our service cluster
     val cluster = H4KCluster<InternalServiceId>()
-        .install(Main.ID) { Main(egress) }
+        .install(Main.ID) { Main(externals) }
         .install(Proxy.ID) { Proxy(it) }
         .expose(Proxy.ID, Port(8000))
         .start()
@@ -40,5 +41,5 @@ fun main() {
     println(client(Request(GET, "")))
 
     cluster.stop()
-    egress.stop()
+    externals.stop()
 }

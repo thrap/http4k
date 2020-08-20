@@ -10,7 +10,7 @@ object FakeDoubler {
     operator fun invoke(): HttpHandler = { req: Request -> Response(Status.OK).body(req.bodyString() + req.bodyString()) }
 
     @JvmStatic
-    fun main(args: Array<String>) {
+    fun main() {
         ProdAppServer { FakeDoubler() }.start()
     }
 }

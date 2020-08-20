@@ -10,7 +10,7 @@ object FakeReverser {
     operator fun invoke(): HttpHandler = { req: Request -> Response(OK).body(req.bodyString().reversed()) }
 
     @JvmStatic
-    fun main(args: Array<String>) {
+    fun main() {
         ProdAppServer { FakeReverser() }.start()
     }
 }

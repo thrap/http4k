@@ -1,5 +1,6 @@
 package org.http4k.h4k.example.main.internal
 
+import org.http4k.cloudnative.env.Environment.Companion.ENV
 import org.http4k.core.HttpHandler
 import org.http4k.core.Request
 import org.http4k.core.Response
@@ -22,5 +23,5 @@ object Main {
         return { _: Request -> Response(Status.OK).body(reverser(doubler("hello world"))) }
     }
 
-    fun main() = ProdAppServer { Main(ExternalDiscovery()) }.start()
+    fun main() = ProdAppServer { Main(ProdExternalDiscovery(ENV)) }.start()
 }
