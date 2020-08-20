@@ -6,13 +6,6 @@ import org.http4k.server.Http4kServer
 import org.http4k.server.SunHttp
 import org.http4k.server.asServer
 
-interface Discovery<ServiceId> {
-    /**
-     * Lookup a Service HttpHandler by it's identifier
-     */
-    fun lookup(id: ServiceId): HttpHandler
-}
-
 /**
  * Run a cluster of HttpHandlers in a way that they can be wired together
  */
