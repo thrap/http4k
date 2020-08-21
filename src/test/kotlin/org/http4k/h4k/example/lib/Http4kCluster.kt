@@ -19,9 +19,10 @@ class H4KCluster<ServiceId>(private val log: (String) -> Unit = ::println) : Dis
     /**
      * Install a Service HttpHandler into the cluster
      */
-    fun install(id: ServiceId, appFn: (Discovery<ServiceId>) -> HttpHandler) = apply {
+    fun install(id: ServiceId, bindTo: Port? = null, appFn: (Discovery<ServiceId>) -> HttpHandler) = apply {
         val app = appFn(this)
         services[id] = app
+        bindTo?.let { expose(id, it) }
     }
 
     /**

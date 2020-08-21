@@ -20,17 +20,14 @@ import org.http4k.h4k.example.test.external.FakeReverser
 fun main() {
     // this is our "fakes" cluster
     val externals = H4KCluster<ExternalServiceId>()
-        .install(Reverser.ID) { FakeReverser() }
-        .expose(Doubler.ID, Port(20000))
-        .install(Doubler.ID) { FakeDoubler() }
-        .expose(Reverser.ID, Port(10000))
+        .install(Reverser.ID, Port(20000)) { FakeReverser() }
+        .install(Doubler.ID, Port(10000)) { FakeDoubler() }
         .start()
 
     // this is our service cluster
     val cluster = H4KCluster<InternalServiceId>()
         .install(Main.ID) { Main(externals) }
-        .install(Proxy.ID) { Proxy(it) }
-        .expose(Proxy.ID, Port(8000))
+        .install(Proxy.ID, Port(8000)) { Proxy(it) }
         .start()
 
     // look up the service HttpHandler by ID
