@@ -12,11 +12,17 @@ import org.http4k.h4k.example.main.internal.gateway.Gateway
 import org.http4k.h4k.example.test.external.doubler.Domain
 import org.http4k.h4k.example.test.external.reverser.Domain
 import org.http4k.h4k.example.test.main.TestEvents
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 
 abstract class TestContract {
     abstract val gateway: Gateway
     abstract val events: TestEvents
+
+    @AfterEach
+    fun sout() {
+        println(events.toList())
+    }
 
     @Test
     fun `can mess with strings`() {
@@ -36,6 +42,11 @@ abstract class InMemoryHttpTestContract : TestContract() {
 
     override val gateway by lazy { Gateway.Http(app) }
     override val events = env.events
+
+    @AfterEach
+    fun other() {
+        println(env.externalEvents.toList())
+    }
 }
 
 class DomainTestContract : TestContract() {

@@ -1,17 +1,21 @@
 package org.http4k.h4k.example.main
 
 import org.http4k.cloudnative.env.Environment
+import org.http4k.core.Filter
 import org.http4k.core.Method
+import org.http4k.core.NoOp
 import org.http4k.core.Uri
 import org.http4k.core.then
 import org.http4k.events.Event
 import org.http4k.events.Events
 import org.http4k.filter.ClientFilters
+import org.http4k.filter.DebuggingFilters.PrintRequestAndResponse
 import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.filter.ServerFilters.RequestTracing
 import org.http4k.h4k.example.lib.Discovery
 import org.http4k.h4k.example.lib.ServiceId
+import org.http4k.h4k.example.main.internal.Settings
 import org.http4k.h4k.example.main.internal.Settings.CREDEMTIALS
 
 /**
@@ -44,6 +48,7 @@ fun ServerStack(env: Environment, events: Events) =
     RecordRequest(events, ::IncomingHttpRequest)
         .then(ServerFilters.BasicAuth("", CREDEMTIALS(env)))
         .then(RequestTracing())
+        .then(if(Settings.DEBUG(env)) PrintRequestAndResponse() else Filter.NoOp)
 
 data class IncomingHttpRequest(
     val uri: Uri,
@@ -55,6 +60,7 @@ data class IncomingHttpRequest(
 fun ClientStack(env: Environment, events: Events) = RecordRequest(events, ::OutgoingHttpRequest)
     .then(ClientFilters.BasicAuth(CREDEMTIALS(env)))
     .then(RequestTracing())
+    .then(if(Settings.DEBUG(env)) PrintRequestAndResponse() else Filter.NoOp)
 
 data class OutgoingHttpRequest(
     val uri: Uri,

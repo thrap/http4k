@@ -30,6 +30,7 @@ import org.http4k.h4k.example.test.main.TestEvents
 
 class TestEnvironment(private val env: Environment = EMPTY) : Environment by env {
     val events = TestEvents()
+    val externalEvents = TestEvents()
 
     object fakes {
         val reverser = Reverser.Domain()
@@ -37,8 +38,8 @@ class TestEnvironment(private val env: Environment = EMPTY) : Environment by env
     }
 
     private val externalCluster = H4KCluster<ExternalServiceId>()
-        .deploy(Reverser.ID) { Reverser.App(reverser) }
-        .deploy(Doubler.ID) { Doubler.App(doubler) }
+        .deploy(Reverser.ID) { Reverser.App(externalEvents, reverser) }
+        .deploy(Doubler.ID) { Doubler.App(externalEvents, doubler) }
 
     private val cluster = H4KCluster<InternalServiceId>()
         .deploy(Backend.ID) { Backend.App(env, events, externalCluster) }
