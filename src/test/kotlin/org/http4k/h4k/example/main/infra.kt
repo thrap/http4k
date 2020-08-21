@@ -7,7 +7,12 @@ import org.http4k.core.NoOp
 import org.http4k.core.Uri
 import org.http4k.core.then
 import org.http4k.events.Event
+import org.http4k.events.EventFilter
+import org.http4k.events.EventFilters
 import org.http4k.events.Events
+import org.http4k.events.NoOp
+import org.http4k.events.plus
+import org.http4k.events.then
 import org.http4k.filter.ClientFilters
 import org.http4k.filter.DebuggingFilters.PrintRequestAndResponse
 import org.http4k.filter.ResponseFilters
@@ -43,6 +48,13 @@ fun RecordRequest(events: Events, toEvent: (Uri, Method, Int, Long) -> Event) = 
         )
     )
 }
+
+fun EventStack(serviceId: ServiceId): EventFilter = EventFilter.NoOp
+    .then(AddAppId(serviceId))
+    .then(EventFilters.AddTimestamp())
+    .then(EventFilters.AddZipkinTraces())
+
+private fun AddAppId(id: ServiceId) = EventFilter { next -> { next(it + ("app" to id.name)) } }
 
 fun ServerStack(env: Environment, events: Events) =
     RecordRequest(events, ::IncomingHttpRequest)

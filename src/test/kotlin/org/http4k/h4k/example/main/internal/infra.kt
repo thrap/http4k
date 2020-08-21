@@ -7,12 +7,6 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Uri
 import org.http4k.core.then
 import org.http4k.events.AutoJsonEvents
-import org.http4k.events.EventFilter
-import org.http4k.events.EventFilters.AddTimestamp
-import org.http4k.events.EventFilters.AddZipkinTraces
-import org.http4k.events.NoOp
-import org.http4k.events.plus
-import org.http4k.events.then
 import org.http4k.filter.ClientFilters.SetBaseUriFrom
 import org.http4k.format.Jackson
 import org.http4k.h4k.example.lib.Discovery
@@ -27,11 +21,7 @@ import org.http4k.server.asServer
 
 class RunningServerInfra(val serviceId: ServiceId) : ServerInfra {
     override val env = ENV
-    override val events = EventFilter.NoOp
-        .then(AddAppId(serviceId))
-        .then(AddTimestamp())
-        .then(AddZipkinTraces())
-        .then(AutoJsonEvents(Jackson, ::println))
+    override val events = AutoJsonEvents(Jackson, ::println)
 
     override val internalDiscovery = object : Discovery<InternalServiceId> {
         override fun lookup(id: InternalServiceId) = SetBaseUriFrom(Uri.of(id.name + ":" + 10000))
@@ -47,5 +37,3 @@ class RunningServerInfra(val serviceId: ServiceId) : ServerInfra {
 fun ExternalServiceId.uriKey() = EnvironmentKey.uri().required(name.toUpperCase() + "_URL")
 
 fun ServerInfra.asAppServer(toApp: ServerInfra.() -> HttpHandler) = toApp().asServer(SunHttp(10000))
-
-private fun AddAppId(id: ServiceId) = EventFilter { next -> { next(it + ("app" to id.name)) } }

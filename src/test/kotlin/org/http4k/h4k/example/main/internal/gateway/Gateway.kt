@@ -6,7 +6,9 @@ import org.http4k.core.Response
 import org.http4k.core.Status.Companion.OK
 import org.http4k.core.then
 import org.http4k.events.Events
+import org.http4k.events.then
 import org.http4k.h4k.example.lib.Discovery
+import org.http4k.h4k.example.main.EventStack
 import org.http4k.h4k.example.main.ExternalServiceId
 import org.http4k.h4k.example.main.InternalServiceId
 import org.http4k.h4k.example.main.ServerStack
@@ -29,13 +31,15 @@ fun main() {
         .start()
 }
 
-val Gateway.Companion.ID get() = InternalServiceId("main")
+val Gateway.Companion.ID get() = InternalServiceId("gateway")
 
 fun Gateway.Companion.App(
-    env: Environment, events: Events,
+    env: Environment, rawEvents: Events,
     internal: Discovery<InternalServiceId>,
     external: Discovery<ExternalServiceId>
 ): HttpHandler {
+    val events = EventStack(ID).then(rawEvents)
+
     val gateway = Gateway.Domain(
         Reverser.Http(external.lookup(Reverser.ID)),
         Backend.Http(internal.lookup(Backend.ID))
