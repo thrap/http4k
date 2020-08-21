@@ -16,11 +16,11 @@ import org.http4k.events.then
 import org.http4k.filter.ClientFilters.SetBaseUriFrom
 import org.http4k.format.Jackson
 import org.http4k.h4k.example.lib.Discovery
+import org.http4k.h4k.example.lib.ServiceId
 import org.http4k.h4k.example.main.ClientStack
 import org.http4k.h4k.example.main.ExternalServiceId
 import org.http4k.h4k.example.main.InternalServiceId
 import org.http4k.h4k.example.main.ServerInfra
-import org.http4k.h4k.example.main.ServiceId
 import org.http4k.lens.uri
 import org.http4k.server.SunHttp
 import org.http4k.server.asServer
@@ -48,6 +48,4 @@ fun ExternalServiceId.uriKey() = EnvironmentKey.uri().required(name.toUpperCase(
 
 fun ServerInfra.asAppServer(toApp: ServerInfra.() -> HttpHandler) = toApp().asServer(SunHttp(10000))
 
-private fun AddAppId(id: ServiceId) = EventFilter { next ->
-    { next(it + ("app" to id)) }
-}
+private fun AddAppId(id: ServiceId) = EventFilter { next -> { next(it + ("app" to id.name)) } }

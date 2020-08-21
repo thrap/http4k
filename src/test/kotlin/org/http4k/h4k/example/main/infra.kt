@@ -11,6 +11,7 @@ import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.filter.ServerFilters.RequestTracing
 import org.http4k.h4k.example.lib.Discovery
+import org.http4k.h4k.example.lib.ServiceId
 import org.http4k.h4k.example.main.internal.Settings.CREDEMTIALS
 
 /**
@@ -18,13 +19,8 @@ Call flow is:
     Proxy (http://proxy:10000) -> Main (http://main:10000) -> Doubler (http://doubler)
                                                            -> Reverser (http://reverser)
  */
-
-sealed class ServiceId(val name: String) {
-    override fun toString() = name
-}
-
-class InternalServiceId(name: String) : ServiceId(name)
-class ExternalServiceId(name: String) : ServiceId(name)
+class InternalServiceId(override val name: String) : ServiceId
+class ExternalServiceId(override val name: String) : ServiceId
 
 interface ServerInfra {
     val env: Environment
