@@ -5,7 +5,7 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method.POST
 import org.http4k.core.Request
 import org.http4k.core.Response
-import org.http4k.core.Status
+import org.http4k.core.Status.Companion.OK
 import org.http4k.core.then
 import org.http4k.events.Events
 import org.http4k.h4k.example.lib.Discovery
@@ -32,7 +32,7 @@ val Backend.Companion.ID get() = InternalServiceId("main")
 fun Backend.Companion.App(env: Environment, events: Events, discovery: Discovery<ExternalServiceId>): HttpHandler {
     val backend = Backend.Domain(Doubler.Http(discovery.lookup(Doubler.ID)))
 
-    return ServerStack(env, events).then { Response(Status.OK).body(backend(it.bodyString())) }
+    return ServerStack(env, events).then { Response(OK).body(backend(it.bodyString())) }
 }
 
 fun Backend.Companion.Domain(doubler: Doubler) = object : Backend {

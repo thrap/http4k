@@ -20,8 +20,10 @@ import org.http4k.h4k.example.main.internal.backend.ID
 import org.http4k.h4k.example.main.internal.gateway.App
 import org.http4k.h4k.example.main.internal.gateway.Gateway
 import org.http4k.h4k.example.main.internal.gateway.ID
-import org.http4k.h4k.example.test.external.doubler.FakeDoubler
-import org.http4k.h4k.example.test.external.reverser.FakeReverser
+import org.http4k.h4k.example.test.external.doubler.App
+import org.http4k.h4k.example.test.external.doubler.Domain
+import org.http4k.h4k.example.test.external.reverser.App
+import org.http4k.h4k.example.test.external.reverser.Domain
 import org.http4k.h4k.example.test.functional.TestEnvironment.fakes.doubler
 import org.http4k.h4k.example.test.functional.TestEnvironment.fakes.reverser
 import org.http4k.h4k.example.test.main.TestEvents
@@ -30,13 +32,13 @@ class TestEnvironment(private val env: Environment = EMPTY) : Environment by env
     val events = TestEvents()
 
     object fakes {
-        val reverser = FakeReverser()
-        val doubler = FakeDoubler()
+        val reverser = Reverser.Domain()
+        val doubler = Doubler.Domain()
     }
 
     private val externalCluster = H4KCluster<ExternalServiceId>()
-        .deploy(Reverser.ID) { reverser }
-        .deploy(Doubler.ID) { doubler }
+        .deploy(Reverser.ID) { Reverser.App(reverser) }
+        .deploy(Doubler.ID) { Doubler.App(doubler) }
 
     private val cluster = H4KCluster<InternalServiceId>()
         .deploy(Backend.ID) { Backend.App(env, events, externalCluster) }

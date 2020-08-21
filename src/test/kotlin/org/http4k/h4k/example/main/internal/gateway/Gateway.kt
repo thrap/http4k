@@ -2,8 +2,6 @@ package org.http4k.h4k.example.main.internal.gateway
 
 import org.http4k.cloudnative.env.Environment
 import org.http4k.core.HttpHandler
-import org.http4k.core.Method.POST
-import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status.Companion.OK
 import org.http4k.core.then
@@ -38,15 +36,13 @@ fun Gateway.Companion.App(
     internal: Discovery<InternalServiceId>,
     external: Discovery<ExternalServiceId>
 ): HttpHandler {
-    val gateway = Gateway.Domain(Reverser.Http(external.lookup(Reverser.ID)), Backend.Http(internal.lookup(Backend.ID)))
+    val gateway = Gateway.Domain(
+        Reverser.Http(external.lookup(Reverser.ID)),
+        Backend.Http(internal.lookup(Backend.ID))
+    )
     return ServerStack(env, events).then { Response(OK).body(gateway(it.bodyString())) }
 }
 
 fun Gateway.Companion.Domain(reverser: Reverser, backend: Backend) = object : Gateway {
     override fun invoke(p1: String): String = backend(reverser(p1))
 }
-
-fun Gateway.Companion.Http(http: HttpHandler) = object : Gateway {
-    override fun invoke(p1: String) = http(Request(POST, "").body(p1)).bodyString()
-}
-
