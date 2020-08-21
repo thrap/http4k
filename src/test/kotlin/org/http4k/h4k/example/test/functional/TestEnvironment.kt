@@ -4,8 +4,8 @@ import org.http4k.cloudnative.env.Environment
 import org.http4k.cloudnative.env.Environment.Companion.EMPTY
 import org.http4k.core.Uri
 import org.http4k.core.then
-import org.http4k.filter.ClientFilters
 import org.http4k.filter.ClientFilters.BasicAuth
+import org.http4k.filter.ClientFilters.SetBaseUriFrom
 import org.http4k.h4k.example.lib.H4KCluster
 import org.http4k.h4k.example.main.ExternalServiceId
 import org.http4k.h4k.example.main.InternalServiceId
@@ -50,7 +50,7 @@ class TestEnvironment(private val env: Environment = EMPTY) : Environment by env
     fun stop() = apply { cluster.stop() }
 
     fun remoteClient() = BasicAuth(CREDEMTIALS(env))
-        .then(ClientFilters.SetBaseUriFrom(Uri.of("http://localhost:${cluster.port()}")))
+        .then(SetBaseUriFrom(Uri.of("http://localhost:${cluster.port()}")))
         .then(cluster.clientFor(Gateway.ID))
 
     fun client() = BasicAuth(CREDEMTIALS(env)).then(cluster.lookup(Gateway.ID))
