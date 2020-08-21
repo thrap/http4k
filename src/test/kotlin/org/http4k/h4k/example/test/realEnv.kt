@@ -1,16 +1,17 @@
 package org.http4k.h4k.example.test
 
-import org.http4k.h4k.example.main.internal.Main
-import org.http4k.h4k.example.main.internal.Proxy
-import org.http4k.h4k.example.test.external.FakeDoubler
-import org.http4k.h4k.example.test.external.FakeReverser
+import org.http4k.h4k.example.main.internal.backend.main as runBackend
+import org.http4k.h4k.example.main.internal.gateway.main as runGateway
+import org.http4k.h4k.example.test.external.doubler.main as runDoubler
+import org.http4k.h4k.example.test.external.reverser.main as runReverser
+
 
 /**
  * The problem here is that we end up having to mess around with a bunch of ports to get everything running correctly...
  */
 fun main() {
-    Proxy.main()
-    Main.main()
-    FakeReverser.main()
-    FakeDoubler.main()
+    runBackend()
+    runGateway()
+    runDoubler()
+    runReverser()
 }

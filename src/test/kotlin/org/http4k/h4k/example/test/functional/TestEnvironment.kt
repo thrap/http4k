@@ -9,13 +9,19 @@ import org.http4k.filter.ClientFilters.BasicAuth
 import org.http4k.h4k.example.lib.H4KCluster
 import org.http4k.h4k.example.main.ExternalServiceId
 import org.http4k.h4k.example.main.InternalServiceId
-import org.http4k.h4k.example.main.external.Doubler
-import org.http4k.h4k.example.main.external.Reverser
-import org.http4k.h4k.example.main.internal.Main
-import org.http4k.h4k.example.main.internal.Proxy
+import org.http4k.h4k.example.main.external.doubler.Doubler
+import org.http4k.h4k.example.main.external.doubler.ID
+import org.http4k.h4k.example.main.external.reverser.ID
+import org.http4k.h4k.example.main.external.reverser.Reverser
 import org.http4k.h4k.example.main.internal.Settings.CREDEMTIALS
-import org.http4k.h4k.example.test.external.FakeDoubler
-import org.http4k.h4k.example.test.external.FakeReverser
+import org.http4k.h4k.example.main.internal.backend.App
+import org.http4k.h4k.example.main.internal.backend.Backend
+import org.http4k.h4k.example.main.internal.backend.ID
+import org.http4k.h4k.example.main.internal.gateway.App
+import org.http4k.h4k.example.main.internal.gateway.Gateway
+import org.http4k.h4k.example.main.internal.gateway.ID
+import org.http4k.h4k.example.test.external.doubler.FakeDoubler
+import org.http4k.h4k.example.test.external.reverser.FakeReverser
 import org.http4k.h4k.example.test.functional.TestEnvironment.fakes.doubler
 import org.http4k.h4k.example.test.functional.TestEnvironment.fakes.reverser
 import org.http4k.h4k.example.test.main.TestEvents
@@ -33,9 +39,9 @@ class TestEnvironment(private val env: Environment = EMPTY) : Environment by env
         .deploy(Doubler.ID) { doubler }
 
     private val cluster = H4KCluster<InternalServiceId>()
-        .deploy(Main.ID) { Main(env, events, externalCluster) }
-        .deploy(Proxy.ID) { Proxy(env, events, it) }
-        .expose(Proxy.ID)
+        .deploy(Backend.ID) { Backend.App(env, events, externalCluster) }
+        .deploy(Gateway.ID) { Gateway.App(env, events, it, externalCluster) }
+        .expose(Gateway.ID)
 
     fun start() = apply { cluster.start() }
 
@@ -43,7 +49,7 @@ class TestEnvironment(private val env: Environment = EMPTY) : Environment by env
 
     fun remoteClient() = BasicAuth(CREDEMTIALS(env))
         .then(ClientFilters.SetBaseUriFrom(Uri.of("http://localhost:${cluster.port()}")))
-        .then(cluster.clientFor(Proxy.ID))
+        .then(cluster.clientFor(Gateway.ID))
 
-    fun client() = BasicAuth(CREDEMTIALS(env)).then(cluster.lookup(Proxy.ID))
+    fun client() = BasicAuth(CREDEMTIALS(env)).then(cluster.lookup(Gateway.ID))
 }
