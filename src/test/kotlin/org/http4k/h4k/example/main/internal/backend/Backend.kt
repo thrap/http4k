@@ -40,7 +40,7 @@ fun Backend.Companion.App(env: Environment, rawEvents: Events, discovery: Discov
 }
 
 fun Backend.Companion.Domain(doubler: Doubler) = object : Backend {
-    override fun invoke(p1: String): String = doubler("hello world")
+    override fun invoke(p1: String): String = doubler(p1)
 }
 
 fun Backend.Companion.Http(http: HttpHandler) = object : Backend {

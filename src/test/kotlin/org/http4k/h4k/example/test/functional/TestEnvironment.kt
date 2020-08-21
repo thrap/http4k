@@ -13,7 +13,7 @@ import org.http4k.h4k.example.main.external.doubler.Doubler
 import org.http4k.h4k.example.main.external.doubler.ID
 import org.http4k.h4k.example.main.external.reverser.ID
 import org.http4k.h4k.example.main.external.reverser.Reverser
-import org.http4k.h4k.example.main.internal.Settings.CREDEMTIALS
+import org.http4k.h4k.example.main.internal.Settings.CREDENTIALS
 import org.http4k.h4k.example.main.internal.backend.App
 import org.http4k.h4k.example.main.internal.backend.Backend
 import org.http4k.h4k.example.main.internal.backend.ID
@@ -50,9 +50,9 @@ class TestEnvironment(private val env: Environment = EMPTY) : Environment by env
 
     fun stop() = apply { cluster.stop() }
 
-    fun remoteClient() = BasicAuth(CREDEMTIALS(env))
+    fun remoteClient() = BasicAuth(CREDENTIALS(env))
         .then(SetBaseUriFrom(Uri.of("http://localhost:${cluster.port()}")))
         .then(cluster.clientFor(Gateway.ID))
 
-    fun client() = BasicAuth(CREDEMTIALS(env)).then(cluster.lookup(Gateway.ID))
+    fun client() = BasicAuth(CREDENTIALS(env)).then(cluster.lookup(Gateway.ID))
 }

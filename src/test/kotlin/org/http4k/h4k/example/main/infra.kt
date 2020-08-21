@@ -21,7 +21,7 @@ import org.http4k.filter.ServerFilters.RequestTracing
 import org.http4k.h4k.example.lib.Discovery
 import org.http4k.h4k.example.lib.ServiceId
 import org.http4k.h4k.example.main.internal.Settings
-import org.http4k.h4k.example.main.internal.Settings.CREDEMTIALS
+import org.http4k.h4k.example.main.internal.Settings.CREDENTIALS
 
 /**
 Call flow is:
@@ -58,7 +58,7 @@ private fun AddAppId(id: ServiceId) = EventFilter { next -> { next(it + ("app" t
 
 fun ServerStack(env: Environment, events: Events) =
     RecordRequest(events, ::IncomingHttpRequest)
-        .then(ServerFilters.BasicAuth("", CREDEMTIALS(env)))
+        .then(ServerFilters.BasicAuth("", CREDENTIALS(env)))
         .then(RequestTracing())
         .then(if(Settings.DEBUG(env)) PrintRequestAndResponse() else Filter.NoOp)
 
@@ -70,7 +70,7 @@ data class IncomingHttpRequest(
 ) : Event
 
 fun ClientStack(env: Environment, events: Events) = RecordRequest(events, ::OutgoingHttpRequest)
-    .then(ClientFilters.BasicAuth(CREDEMTIALS(env)))
+    .then(ClientFilters.BasicAuth(CREDENTIALS(env)))
     .then(RequestTracing())
     .then(if(Settings.DEBUG(env)) PrintRequestAndResponse() else Filter.NoOp)
 

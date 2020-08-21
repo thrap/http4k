@@ -5,6 +5,8 @@ import org.http4k.core.Response
 import org.http4k.core.Status.Companion.OK
 import org.http4k.core.then
 import org.http4k.events.Events
+import org.http4k.events.then
+import org.http4k.h4k.example.main.EventStack
 import org.http4k.h4k.example.main.external.doubler.Doubler
 import org.http4k.h4k.example.main.external.doubler.ID
 import org.http4k.h4k.example.main.internal.RunningServerInfra
@@ -16,7 +18,7 @@ fun Doubler.Companion.Domain() = object : Doubler {
 }
 
 fun Doubler.Companion.App(events: Events, doubler: Doubler): HttpHandler =
-    FakeServerStack(events).then { Response(OK).body(doubler(it.bodyString())) }
+    FakeServerStack(EventStack(ID).then(events)).then { Response(OK).body(doubler(it.bodyString())) }
 
 
 fun main() {

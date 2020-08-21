@@ -6,8 +6,8 @@ import org.http4k.lens.boolean
 import org.http4k.lens.composite
 
 object Settings {
-    val DEBUG = EnvironmentKey.boolean().defaulted("DEBUG", true)
-    val CREDEMTIALS = EnvironmentKey.composite {
+    val DEBUG = EnvironmentKey.boolean().defaulted("DEBUG", false)
+    val CREDENTIALS = EnvironmentKey.composite {
         Credentials(
             defaulted("USER", "user")(it),
             defaulted("PASSWORD", "password")(it)

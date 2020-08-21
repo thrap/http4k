@@ -8,6 +8,7 @@ import org.http4k.core.then
 import org.http4k.events.Events
 import org.http4k.events.then
 import org.http4k.h4k.example.lib.Discovery
+import org.http4k.h4k.example.main.ClientStack
 import org.http4k.h4k.example.main.EventStack
 import org.http4k.h4k.example.main.ExternalServiceId
 import org.http4k.h4k.example.main.InternalServiceId
@@ -41,12 +42,12 @@ fun Gateway.Companion.App(
     val events = EventStack(ID).then(rawEvents)
 
     val gateway = Gateway.Domain(
-        Reverser.Http(external.lookup(Reverser.ID)),
-        Backend.Http(internal.lookup(Backend.ID))
+        Reverser.Http(ClientStack(env, events).then(external.lookup(Reverser.ID))),
+        Backend.Http(ClientStack(env, events).then(internal.lookup(Backend.ID)))
     )
     return ServerStack(env, events).then { Response(OK).body(gateway(it.bodyString())) }
 }
 
 fun Gateway.Companion.Domain(reverser: Reverser, backend: Backend) = object : Gateway {
-    override fun invoke(p1: String): String = backend(reverser(p1))
+    override fun invoke(p1: String) = backend(reverser(p1))
 }
