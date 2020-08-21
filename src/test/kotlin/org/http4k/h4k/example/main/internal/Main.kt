@@ -25,5 +25,5 @@ object Main {
         return ServerStack(env, events).then { Response(OK).body(reverser(doubler("hello world"))) }
     }
 
-    fun main() = ProdAppServer { Main(env, events, externalDiscovery) }.start()
+    fun main() = RunningServerInfra(ID).asAppServer { Main(env, events, externalDiscovery) }.start()
 }

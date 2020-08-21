@@ -16,6 +16,6 @@ object Proxy {
     operator fun invoke(env: Environment, events: Events, discovery: Discovery<InternalServiceId>) =
         ServerStack(env, events).then(discovery.lookup(Main.ID))
 
-    fun main() = ProdAppServer { Proxy(env, events, internalDiscovery) }.start()
+    fun main() = RunningServerInfra(ID).asAppServer { Proxy(env, events, internalDiscovery) }.start()
 }
 

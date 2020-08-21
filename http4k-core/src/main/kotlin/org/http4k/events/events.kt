@@ -26,6 +26,7 @@ interface EventFilter : (Events) -> Events {
     }
 }
 
+val EventFilter.Companion.NoOp: EventFilter get() = EventFilter { next -> { next(it) } }
 fun EventFilter.then(next: EventFilter): EventFilter = EventFilter { this(next(it)) }
 fun EventFilter.then(next: Events): Events = { this(next)(it) }
 

@@ -1,21 +1,53 @@
 package org.http4k.h4k.example.main.internal
 
+import org.http4k.client.OkHttp
 import org.http4k.cloudnative.env.Environment.Companion.ENV
+import org.http4k.cloudnative.env.EnvironmentKey
 import org.http4k.core.HttpHandler
+import org.http4k.core.Uri
+import org.http4k.core.then
 import org.http4k.events.AutoJsonEvents
+import org.http4k.events.EventFilter
 import org.http4k.events.EventFilters.AddTimestamp
 import org.http4k.events.EventFilters.AddZipkinTraces
+import org.http4k.events.NoOp
+import org.http4k.events.plus
 import org.http4k.events.then
+import org.http4k.filter.ClientFilters.SetBaseUriFrom
 import org.http4k.format.Jackson
+import org.http4k.h4k.example.lib.Discovery
+import org.http4k.h4k.example.main.ClientStack
+import org.http4k.h4k.example.main.ExternalServiceId
+import org.http4k.h4k.example.main.InternalServiceId
 import org.http4k.h4k.example.main.ServerInfra
+import org.http4k.h4k.example.main.ServiceId
+import org.http4k.lens.uri
 import org.http4k.server.SunHttp
 import org.http4k.server.asServer
 
-class ProdServerInfra : ServerInfra {
+class RunningServerInfra(val serviceId: ServiceId) : ServerInfra {
     override val env = ENV
-    override val events = AddTimestamp().then(AddZipkinTraces()).then(AutoJsonEvents(Jackson, ::println))
-    override val internalDiscovery = ProdInternalDiscovery()
-    override val externalDiscovery = ProdExternalDiscovery(env)
+    override val events = EventFilter.NoOp
+        .then(AddAppId(serviceId))
+        .then(AddTimestamp())
+        .then(AddZipkinTraces())
+        .then(AutoJsonEvents(Jackson, ::println))
+
+    override val internalDiscovery = object : Discovery<InternalServiceId> {
+        override fun lookup(id: InternalServiceId) = SetBaseUriFrom(Uri.of(id.name + ":" + 10000))
+            .then(ClientStack(env, events))
+            .then(OkHttp())
+    }
+
+    override val externalDiscovery = object : Discovery<ExternalServiceId> {
+        override fun lookup(id: ExternalServiceId) = SetBaseUriFrom(id.uriKey()(env)).then(OkHttp())
+    }
 }
 
-fun ProdAppServer(toApp: ServerInfra.() -> HttpHandler) = ProdServerInfra().toApp().asServer(SunHttp(10000))
+fun ExternalServiceId.uriKey() = EnvironmentKey.uri().required(name.toUpperCase() + "_URL")
+
+fun ServerInfra.asAppServer(toApp: ServerInfra.() -> HttpHandler) = toApp().asServer(SunHttp(10000))
+
+private fun AddAppId(id: ServiceId) = EventFilter { next ->
+    { next(it + ("app" to id)) }
+}

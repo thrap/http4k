@@ -6,8 +6,9 @@ import org.http4k.core.Uri
 import org.http4k.core.then
 import org.http4k.events.Event
 import org.http4k.events.Events
+import org.http4k.filter.ClientFilters
 import org.http4k.filter.ResponseFilters
-import org.http4k.filter.ServerFilters.BasicAuth
+import org.http4k.filter.ServerFilters
 import org.http4k.filter.ServerFilters.RequestTracing
 import org.http4k.h4k.example.lib.Discovery
 import org.http4k.h4k.example.main.internal.Settings.CREDEMTIALS
@@ -45,7 +46,7 @@ fun RecordRequest(events: Events, toEvent: (Uri, Method, Int, Long) -> Event) = 
 
 fun ServerStack(env: Environment, events: Events) =
     RecordRequest(events, ::IncomingHttpRequest)
-        .then(BasicAuth("", CREDEMTIALS(env)))
+        .then(ServerFilters.BasicAuth("", CREDEMTIALS(env)))
         .then(RequestTracing())
 
 data class IncomingHttpRequest(
@@ -55,7 +56,8 @@ data class IncomingHttpRequest(
     val duration: Long
 ) : Event
 
-fun ClientStack(infra: ServerInfra) = RecordRequest(infra.events, ::OutgoingHttpRequest)
+fun ClientStack(env: Environment, events: Events) = RecordRequest(events, ::OutgoingHttpRequest)
+    .then(ClientFilters.BasicAuth(CREDEMTIALS(env)))
     .then(RequestTracing())
 
 data class OutgoingHttpRequest(
